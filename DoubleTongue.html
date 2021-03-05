@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body style="padding-top: 10%;" id="body">
+    <div id="sidebar">
+        <label for="digits">Number per row: </label>
+        <input type="number" id="digits" min="1" max="16" value="6"><br><br>
+        <input type="checkbox" id="auto-scroll" checked>auto-scroll</input><br><br>
+        <label for="scrollSpeed">Scroll Speed: </label>
+        <input type="range" id="scrollSpeed" min="0" max="50" value="50" style="width: 90%;"></input><br><br>
+        <input type="button" id="generate" value="Generate">
+    </div>
+    <div id="rows">
+
+    </div>
+</body>
+<script>
+    const rows = document.getElementById("rows");
+    const autoScroll = document.getElementById("auto-scroll");
+    const scrollSpeed = document.getElementById("scrollSpeed");
+    const generate = document.getElementById("generate");
+    const digits = document.getElementById("digits");
+
+    let scrolling = autoScroll.checked;
+    let startedScroll = false;
+    let yMax = -1
+
+    generate.onclick = function(){
+        rows.innerHTML = '';
+        let n = digits.value;
+        const colors = ["#f66", "#6f6", "#66f", "#ff6"];
+        for(let c = 0; c < Math.pow(2, n); c++){
+            let t = dec2bin(c);
+            let s = formatBinary(t, n);
+            let row = document.createElement('p');
+            let leader = "..............................................".substring(0, Math.log10(Math.pow(2,n))+2);
+            leader = (c+1).toString().concat(leader);
+            leader = leader.substring(0, leader.length-Math.log10(c+2));
+            row.textContent = leader + s;
+            row.className = "row";
+            row.style.backgroundColor = colors[c%4];
+            rows.appendChild(row);
+        }
+        window.scrollTo(0, 0);
+        let scrollHeight = Math.max(
+            document.body.scrollHeight, document.documentElement.scrollHeight,
+            document.body.offsetHeight, document.documentElement.offsetHeight,
+            document.body.clientHeight, document.documentElement.clientHeight
+        );
+        yMax = scrollHeight - window.innerHeight;
+        console.log(yMax);
+        if(!startedScroll){
+            pageScroll(Speed());
+            startedScroll = true;
+        }
+    }
+
+    
+
+    function dec2bin(dec){
+        return (dec >>> 0).toString(2);
+    }
+
+    function formatBinary(bin, n){
+        let s = "";
+        for(let i = bin.length; i < n; i++){
+            s += "T ";
+        }
+        for(let i = 0; i < bin.length; i++){
+            if(bin.charAt(i) == '0'){
+                s += "T ";
+            } else{
+                s += "K ";
+            }
+        }
+        s+="\n";
+        return s;
+    }
+
+    function pageScroll(speed) {
+        if(scrolling){
+            window.scrollBy(0, 1);
+            if(window.pageYOffset >= yMax){
+                setTimeout(window.scrollTo, 1000, 0, 1);
+            }
+        }
+        scrollDelay = setTimeout(pageScroll, speed, Speed());   
+    }
+
+    function Speed(){
+        return scrollSpeed.max - parseInt(scrollSpeed.value);
+    }
+
+    autoScroll.onclick = function(){
+        if(autoScroll.checked === true){
+            scrolling = true;
+        } else {
+            scrolling = false;
+        }
+    }
+</script>
+<style>
+    #sidebar {
+        background-color: #fafafa;
+        border: #666;
+        border-style: solid;
+        border-width: 3px;
+        height: 200px;
+        padding-top: 10px;
+        padding-left: 10px;
+        margin-left: 75%;
+        width: 15%;
+        position: fixed;
+    }
+
+    .row {
+        font-size: 30pt;
+        font-family: monospace;
+        padding: 0;
+        margin: 0;
+        width: 70%;
+    }
+
+    #rows {
+        padding-bottom: 10%;
+    }
+</style>
+</html>
